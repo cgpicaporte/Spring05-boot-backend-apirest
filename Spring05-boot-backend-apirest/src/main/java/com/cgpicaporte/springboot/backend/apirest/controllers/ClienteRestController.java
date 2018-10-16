@@ -3,6 +3,9 @@ package com.cgpicaporte.springboot.backend.apirest.controllers;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -12,11 +15,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cgpicaporte.springboot.backend.apirest.models.entity.Cliente;
 import com.cgpicaporte.springboot.backend.apirest.models.services.IClienteService;
+import com.cgpicaporte.springboot.backend.apirest.view.xml.ClienteList;
 
 @CrossOrigin(origins= {"http://localhost:4200"})
 @RestController
@@ -26,9 +32,23 @@ public class ClienteRestController {
 	@Autowired
 	private IClienteService clienteService;
 	
-	@GetMapping("/clientes")
+	@GetMapping("/clientesall")
 	public List<Cliente> index(){
 		return clienteService.findAll();
+	}
+	
+	@GetMapping(value = "/clientesxml")
+	public @ResponseBody ClienteList listarXMLRest(@RequestParam(name = "page", defaultValue = "0") int page, @RequestParam(name = "size", defaultValue = "10") int size) {
+		Pageable pageRequest = PageRequest.of(page, size);
+		Page<Cliente> clientes = clienteService.findAll(pageRequest);
+		return new ClienteList(clientes.getContent());
+	}
+	
+	@GetMapping(value = "/clientes")
+	public @ResponseBody List<Cliente> listarXMLRestJson(@RequestParam(name = "page", defaultValue = "0") int page, @RequestParam(name = "size", defaultValue = "10") int size) {
+		Pageable pageRequest = PageRequest.of(page, size);
+		Page<Cliente> clientes = clienteService.findAll(pageRequest);
+		return clientes.getContent();
 	}
 	
 	@GetMapping("/clientes/{id}")
